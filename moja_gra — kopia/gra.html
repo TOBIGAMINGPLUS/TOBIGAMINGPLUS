@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kliknij kulkę - Multiplayer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #f4f4f4;
+            position: relative;
+            height: 300vh; /* Ustawiamy wysokość strony na 300% */
+            overflow-x: hidden; /* Blokujemy poziome przewijanie */
+        }
+        #ball, #blueBall {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+        }
+        #ball {
+            background-color: red;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #blueBall {
+            background-color: blue;
+            top: 60%; /* Kulka znajduje się nieco niżej, by była widoczna przy przewijaniu */
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #clickCounter1, #clickCounter2, #timer {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        #achievements, #scoreboard {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+        }
+        #scoreboard table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 80%; /* Zwiększamy szerokość tabeli */
+        }
+        #scoreboard th, #scoreboard td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #scoreboard th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #footer {
+            margin-top: 200px;
+            padding: 20px;
+            background-color: #222;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kliknij kulkę - Multiplayer!</h1>
+    <div id="ball"></div>
+    <div id="blueBall"></div>
+    <div id="clickCounter1">Gracz 1 - Liczba kliknięć: 0</div>
+    <div id="clickCounter2">Gracz 2 - Liczba kliknięć: 0</div>
+    <div id="timer">Czas gry: 0 sekund</div>
+    <div id="achievements"></div>
+    <div id="scoreboard">
+        <h2>Tablica Wyników</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Gracz</th>
+                    <th>Wynik</th>
+                </tr>
+            </thead>
+            <tbody id="scoresTableBody"></tbody>
+        </table>
+    </div>
+    
+    <div id="footer">
+        <p>To jest dolna część strony. Dodaj tutaj więcej treści, jak np. statystyki, opisy, lub inne informacje.</p>
+    </div>
+    
+    <script>
+        var ball = document.getElementById('ball');
+        var blueBall = document.getElementById('blueBall');
+        var clickCounter1 = document.getElementById('clickCounter1');
+        var clickCounter2 = document.getElementById('clickCounter2');
+        var timerDisplay = document.getElementById('timer');
+        var achievementsDiv = document.getElementById('achievements');
+        var scoresTableBody = document.getElementById('scoresTableBody');
+        
+        var clickCount1 = 0;
+        var clickCount2 = 0;
+        var gameSeconds = 0;
+
+        var achievements1 = {
+            1000: false,
+            10000: false,
+            100000: false,
+            1000000: false
+        };
+
+        var achievements2 = {
+            1000: false,
+            10000: false,
+            100000: false,
+            1000000: false
+        };
+
+        ball.addEventListener('click', function() {
+            clickCount1++;
+            moveBall(ball);
+            clickCounter1.textContent = "Gracz 1 - Liczba kliknięć: " + clickCount1;
+            checkAchievements(clickCount1, achievements1, "Gracz 1");
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'w' || event.key === 'W') {
+                clickCount2++;
+                moveBall(blueBall);
+                clickCounter2.textContent = "Gracz 2 - Liczba kliknięć: " + clickCount2;
+                checkAchievements(clickCount2, achievements2, "Gracz 2");
+            }
+        });
+
+        function moveBall(ballElement) {
+            var x = Math.random() * (window.innerWidth - 50);
+            var y = Math.random() * (window.innerHeight - 50);
+
+            // Upewnij się, że kulka nie wyjdzie poza ekran
+            if (x < 0) x = 0;
+            if (y < 0) y = 0;
+            if (x > window.innerWidth - 50) x = window.innerWidth - 50;
+            if (y > window.innerHeight - 50) y = window.innerHeight - 50;
+
+            ballElement.style.left = x + 'px';
+            ballElement.style.top = y + 'px';
+        }
+
+        function checkAchievements(clickCount, achievements, player) {
+            if (clickCount >= 1000 && !achievements[1000]) {
+                achievements[1000] = true;
+                showAchievement(player + " Osiągnięcie: 1000 kliknięć!");
+            }
+            if (clickCount >= 10000 && !achievements[10000]) {
+                achievements[10000] = true;
+                showAchievement(player + " Osiągnięcie: 10 000 kliknięć!");
+            }
+            if (clickCount >= 100000 && !achievements[100000]) {
+                achievements[100000] = true;
+                showAchievement(player + " Osiągnięcie: 100 000 kliknięć!");
+            }
+            if (clickCount >= 1000000 && !achievements[1000000]) {
+                achievements[1000000] = true;
+                showAchievement(player + " Osiągnięcie: 1 000 000 kliknięć!");
+            }
+        }
+
+        function showAchievement(message) {
+            var achievementMessage = document.createElement('p');
+            achievementMessage.textContent = message;
+            achievementsDiv.appendChild(achievementMessage);
+        }
+
+        // Tablica wyników
+        function updateScoreboard() {
+            var scores = [
+                {player: 'Gracz 1', score: clickCount1},
+                {player: 'Gracz 2', score: clickCount2}
+            ];
+
+            // Sortowanie wyników
+            scores.sort(function(a, b) {
+                return b.score - a.score;
+            });
+
+            scoresTableBody.innerHTML = ''; // Wyczyść tablicę wyników
+
+            scores.forEach(function(score) {
+                var row = document.createElement('tr');
+                var playerCell = document.createElement('td');
+                var scoreCell = document.createElement('td');
+                
+                playerCell.textContent = score.player;
+                scoreCell.textContent = score.score;
+                
+                row.appendChild(playerCell);
+                row.appendChild(scoreCell);
+                
+                scoresTableBody.appendChild(row);
+            });
+        }
+
+        // Zegar czasu gry
+        setInterval(function() {
+            gameSeconds++;
+            timerDisplay.textContent = "Czas gry: " + gameSeconds + " sekund";
+            updateScoreboard();
+        }, 1000); // Zaktualizuj co 1 sekundę
+    </script>
+</body>
+</html>
